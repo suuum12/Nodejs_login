@@ -32,6 +32,7 @@ app.use(session({
     },
 }));
 
+//라우터 만나기 전에 deserializeUser 먼저 실행됨
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 
