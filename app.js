@@ -4,7 +4,10 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const path = require('path');
 const {sequelize} = require('./models');
+const passport = require('passport');
+const passportConfig = require('./passport');
 sequelize.sync();
+passportConfig(passport);
 
 require('dotenv').config();
 
@@ -31,6 +34,8 @@ app.use(session({
         secure:false, //쿠키의 https 사용 여부
     },
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 //라우터 만나기 전에 deserializeUser 먼저 실행됨
 app.use('/', indexRouter);
