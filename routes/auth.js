@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const {User} = require('../models');
+const {isLoggedIn, isNotLoggedIn} = require('./middlewares');
 
 router.get('/', (req,res,next)=>{
     res.render('auth');
@@ -14,7 +15,8 @@ router.get('/', (req,res,next)=>{
 //get은 주소 표시줄에 넣어서 서버에 전달한다
 
 //회원가입 페이지
-router.post('/join', async (req, res, next) => {
+router.post('/join', isNotLoggedIn, async (req, res, next) => {
+    //router.post(미들웨어1, 미들웨어2, 미들웨어3 ) 순서로 진행.
     const {email, nick, password} = req.body;
     try {
         const exUser = await User.findOne({where:{email}});
@@ -38,7 +40,7 @@ router.post('/join', async (req, res, next) => {
 });
 
 //로그인 페이지
-router.post('/login', (req, res, next) => {
+router.post('/login', isNotLoggedIn, (req, res, next) => {
     passport.authenticate('local', (authError,user,info) => {
        if(authError){ //서버 에러
             console.error(authError);
@@ -56,16 +58,15 @@ router.post('/login', (req, res, next) => {
             }
             return res.redirect('/');
             //성공했을 경우 메인으로 보내줌
-        });
-    })
-    (req, res, next);
+        })
+    })(req, res, next);
 });
 
 //로그아웃 페이지
-router.get('/logout', (req, res) => {
+router.get('/logout', isLoggedIn, (req, res) => {
    req.logout(); //passport에서 추가해준 메서드
    req.session.destroy(); //req.user를 삭제해줌
-   req.redirect('/'); //로그아웃 후 메인으로
+   res.redirect('/'); //로그아웃 후 메인으로
 });
 
 module.exports = router;
